@@ -1,0 +1,23 @@
+.QWidget{
+    background-color: bisque;
+}
+.QLabel{
+    font-size: 20px;
+    font-family: "Comic Sans MS";
+}
+.QPushButton:hover{
+    background-color: rgb(213, 190, 163);
+    font-size: 20px;
+    font-family: "Comic Sans MS";
+    border-radius: 10px;
+}
+.QPushButton{
+    background-color: rgb(194, 172, 148);
+    font-size: 18px;
+    font-family: "Comic Sans MS";
+    border-radius: 10px;
+}
+.QLineEdit{
+    font-size: 20px;
+    font-family: "Comic Sans MS";
+}
