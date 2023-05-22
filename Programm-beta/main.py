@@ -8,8 +8,9 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QRadioButton,
     QCheckBox,
-    QButtonGroup,
+    QGroupBox,
 )
 
 
@@ -49,6 +50,7 @@ class AuthWindow(QMainWindow):
             self.quest1Window = Quest1Window()
             self.quest1Window.show()
             self.close()
+
         else:
             self.capchaWindow = CapchaWindow()
             self.capchaWindow.show()
@@ -56,6 +58,8 @@ class AuthWindow(QMainWindow):
 
 
 class Quest1Window(QMainWindow):
+    results = [0, 0]
+
     def __init__(self):
         super().__init__()
 
@@ -65,14 +69,9 @@ class Quest1Window(QMainWindow):
         self.lblTest1 = QLabel("Вопрос №1")
         self.btnTestNext1 = QPushButton("Ответит")
 
-        self.btnTestCheck11 = QCheckBox("1")
-        self.btnTestCheck21 = QCheckBox("2")
-        self.btnTestCheck31 = QCheckBox("3")
-
-        self.btnGroup1 = QButtonGroup()
-        self.btnGroup1.addButton(self.btnTestCheck11)
-        self.btnGroup1.addButton(self.btnTestCheck21)
-        self.btnGroup1.addButton(self.btnTestCheck31)
+        self.btnTestCheck11 = QRadioButton("1")
+        self.btnTestCheck21 = QRadioButton("2")
+        self.btnTestCheck31 = QRadioButton("3")
 
         layout = QVBoxLayout()
         layout.addWidget(self.lblTest1)
@@ -86,20 +85,24 @@ class Quest1Window(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-        self.btnTestNext1.clicked.connect(self.quest_next1)
+        self.btnTestNext1.clicked.connect(self.next_clicked1)
 
         with open("style.css", "r") as css:
             widget.setStyleSheet(css.read())
 
-    def quest_next1(self):
-        self.quest2 = Quest2Window()
-        self.quest2.show()
+    def next_clicked1(self):
+        if self.btnTestCheck11.isChecked():
+            self.results[0] += 100
+        self.quest2Window = Quest2Window(self.results)
+        self.quest2Window.show()
         self.close()
 
 
 class Quest2Window(QMainWindow):
-    def __init__(self):
+    def __init__(self, results):
         super().__init__()
+
+        self.results = results
 
         self.resize(300, 200)
         self.setWindowTitle("Тест")
@@ -111,11 +114,6 @@ class Quest2Window(QMainWindow):
         self.btnTestCheck12 = QCheckBox("1")
         self.btnTestCheck22 = QCheckBox("2")
         self.btnTestCheck32 = QCheckBox("3")
-
-        self.btnGroup2 = QButtonGroup()
-        self.btnGroup2.addButton(self.btnTestCheck12)
-        self.btnGroup2.addButton(self.btnTestCheck22)
-        self.btnGroup2.addButton(self.btnTestCheck32)
 
         layout = QVBoxLayout()
         layout.addWidget(self.lblTest2)
@@ -130,92 +128,80 @@ class Quest2Window(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-        self.btnTestNext2.clicked.connect(self.quest_next2)
-        self.btnTestBack2.clicked.connect(self.quest_back2)
+        self.btnTestNext2.clicked.connect(self.next_clicked2)
+        self.btnTestBack2.clicked.connect(self.back_clicked)
 
         with open("style.css", "r") as css:
             widget.setStyleSheet(css.read())
 
-    def quest_next2(self):
-        self.quest3 = Quest3Window()
-        self.quest3.show()
+    def next_clicked2(self):
+        if self.btnTestCheck12.isChecked():
+            self.results[1] += 50
+        if self.btnTestCheck22.isChecked():
+            self.results[1] += 50
+        if self.btnTestCheck32.isChecked():
+            self.results[1] -= 50
+        if self.results[1] < 0:
+            self.results[1] = 0
+        j = 0
+        for i in self.results:
+            if i == 100:
+                j += 2
+            elif i == 50:
+                j += 1
+        self.testFinishWindow = TestFinishWindow(str(j), self.results)
+        self.testFinishWindow.show()
         self.close()
 
-    def quest_back2(self):
-        self.quest1 = Quest1Window()
-        self.quest1.show()
-        self.close()
-
-
-class Quest3Window(QMainWindow):
-    def __init__(self):
-        super().__init__()
-
-        self.resize(300, 200)
-        self.setWindowTitle("Тест")
-
-        self.lblTest3 = QLabel("Вопрос №3")
-        self.btnTestNext3 = QPushButton("Ответит")
-        self.btnTestBack3 = QPushButton("Назад")
-
-        self.btnTestCheck13 = QCheckBox("1")
-        self.btnTestCheck23 = QCheckBox("2")
-        self.btnTestCheck33 = QCheckBox("3")
-
-        self.btnGroup3 = QButtonGroup()
-        self.btnGroup3.addButton(self.btnTestCheck13)
-        self.btnGroup3.addButton(self.btnTestCheck23)
-        self.btnGroup3.addButton(self.btnTestCheck33)
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.lblTest3)
-        layout.addWidget(self.btnTestCheck13)
-        layout.addWidget(self.btnTestCheck23)
-        layout.addWidget(self.btnTestCheck33)
-        layout.addWidget(self.btnTestNext3)
-        layout.addWidget(self.btnTestBack3)
-
-        self.setLayout(layout)
-        widget = QWidget()
-        widget.setLayout(layout)
-        self.setCentralWidget(widget)
-
-        self.btnTestNext3.clicked.connect(self.quest_next3)
-        self.btnTestBack3.clicked.connect(self.quest_back3)
-
-        with open("style.css", "r") as css:
-            widget.setStyleSheet(css.read())
-
-    def quest_next3(self):
-        self.questF = TestFinishWindow()
-        self.questF.show()
-        self.close()
-
-    def quest_back3(self):
-        self.quest2 = Quest2Window()
-        self.quest2.show()
+    def back_clicked(self):
+        self.results[0] = 0
+        self.quest1Window = Quest1Window()
+        self.quest1Window.show()
         self.close()
 
 
 class TestFinishWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, result, bal):
         super().__init__()
 
         self.resize(300, 200)
         self.setWindowTitle("Тест")
 
-        self.lblTestF = QLabel("Тест пройден")
+        self.bal = bal
+        self.result = result
 
-        layout = QVBoxLayout()
-        layout.addWidget(self.lblTestF)
+        self.txt = QLabel("<center>Тест пройден</center>")
+        self.txt1 = QLabel(f"<center>Вы набрали {result} из 4 баллов</center>")
+        self.btn = QPushButton("Записать результаты в файл")
 
-        self.setLayout(layout)
+        gb = QGroupBox("Смотреть результаты")
+        self.gb_lbl1 = QLabel(f"Вопрос 1: {int(bal[0]/50)} б.")
+        self.gb_lbl2 = QLabel(f"Вопрос 2: {int(bal[1]/50)} б.")
+
+        vbox_group = QVBoxLayout()
+        vbox_group.addWidget(self.gb_lbl1)
+        vbox_group.addWidget(self.gb_lbl2)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.txt)
+        vbox.addWidget(self.txt1)
+        vbox.addWidget(gb)
+        vbox.addWidget(self.btn)
+
         widget = QWidget()
-        widget.setLayout(layout)
+        widget.setLayout(vbox)
+        gb.setLayout(vbox_group)
         self.setCentralWidget(widget)
+
+        self.btn.clicked.connect(self.write_res_clicked)
 
         with open("style.css", "r") as css:
             widget.setStyleSheet(css.read())
+
+    def write_res_clicked(self):
+        resultat = f"Результаты \n Вы набрали {self.result} из 4 баллов \n Вопрос 1: {int(self.bal[0]/50)} \n Вопрос 2: {int(self.bal[1]/50)}"
+        with open("results.txt", "w", encoding="utf-8") as res:
+            res.write(resultat)
 
 
 class CapchaWindow(QMainWindow):
